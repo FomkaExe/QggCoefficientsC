@@ -121,10 +121,6 @@ int main()
             dyc[i][j] = 0;
         }
     }
-
-    // zero initialising arrays
-
-    // инициализируем массивы нулями
     for (int i = 0; i < K1; ++i)
     {
         D[i] = 0;
