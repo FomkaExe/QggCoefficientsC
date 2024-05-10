@@ -1,6 +1,6 @@
-// calculation of Qgg coefficients (Q-thermal energy, g-ground state, Qgg -defference of ground state energies of the colliding ions)
-// also called as elements lines
-// for each element produced in the nuclear reactions cross-sections of different isiotopes of each element 'S' form a line in Q-S plane
+// Calculation of Qgg coefficients (Q - thermal energy, g - ground state, 
+// Qgg - difference of ground state energies of the colliding ions, also called as elements lines)
+// for each element produced in the nuclear reactions cross-sections of different isotopes of each element 'S' form a line in Q-S plane
 // our task is to find the parallel lines y=a*x+b that descibes the cross-sections of different elements with the best accuracy
 // for this we use least-square root method
 // after applying it to our problem we obtain the system of linear equations
@@ -22,7 +22,6 @@ void gaussMethod(double c1[K1][K1], double d1[K1], double b[K1])
     int indD[K1];
     int cold[K1];
 
-    // +
     for (int i = 0; i < K1; ++i)
     {
         indD[i] = i;
@@ -32,60 +31,66 @@ void gaussMethod(double c1[K1][K1], double d1[K1], double b[K1])
         }
     }
 
-    // 
-    for (int j = 0; j < K; ++j) {
-        int i0 = j;
-        int iflag = -1;
-        int j1 = j + 1;
-        double cmax = c1[j][j];
+    // reducing coefficient matrix to a triangular one
 
-        for (int is = j1; is < K1; ++is) {
-            if (fabs(cmax) < fabs(c1[is][j])) {
-                i0 = is;
-                cmax = c1[is][j];
+    // Приводим матрицу коэффициентов к треугольной
+    for (int i = 0; i < K; ++i) {
+        int i0 = i;
+        int iflag = -1;
+        int j1 = i + 1;
+        double cmax = c1[i][i];
+
+        for (int j = j1; j < K1; ++j) {
+            if (fabs(cmax) < fabs(c1[j][i])) {
+                i0 = j;
+                cmax = c1[j][i];
                 iflag = 1;
             }
-        } //+
+        }
+
         if (iflag == 1) {
-            for (int jc = 0; jc < K1; ++jc) {
-                cold[jc] = c1[j][jc];
-                c1[j][jc] = c1[i0][jc];
-                c1[i0][jc] = cold[jc];
+            for (int j = 0; j < K1; ++j) {
+                cold[j] = c1[i][j];
+                c1[i][j] = c1[i0][j];
+                c1[i0][j] = cold[j];
             }
-            double dold = d1[j];
-            d1[j] = d1[i0];
+            double dold = d1[i];
+            d1[i] = d1[i0];
             d1[i0] = dold;
 
-            double indDold = indD[j];
-            indD[j] = indD[i0];
+            double indDold = indD[i];
+            indD[i] = indD[i0];
             indD[i0] = indDold;
         }
-        for (int i = j1; i < K1; ++i) {
-            q[i][j] = c1[i][j]/c1[j][j];
-            cnew[i][j] = q[i][j];
-            d1[i] -= q[i][j]*d1[j];
+
+        for (int j = j1; j < K1; ++j) {
+            q[j][i] = c1[j][i]/c1[i][i];
+            cnew[j][i] = q[j][i];
+            d1[j] -= q[j][i]*d1[i];
             for (int j2 = j1; j2 < K1; ++j2) {
-                c1[i][j2] -= q[i][j]*c1[j][j2];
+                c1[j][j2] -= q[j][i]*c1[i][j2];
             }
         }
     }
 
+    // finding the results
+
+    // Находим результаты
     b[K1 - 1] = d1[K1 - 1]/c1[K1 - 1][K1 - 1];
+
     for (int i = 0; i < K; ++i) {
         int IM = K - i - 1;
         double aux = d1[IM];
         for (int j = IM; j < K; ++j) {
             aux -= c1[IM][j + 1]*b[j + 1];
         }
+
         b[IM] = aux/c1[IM][IM];
     }
 }
 
 int main()
 {
-    // const int K = 7;
-    // const int K1 = 8;
-    // const int N = 11;
     int K0 = 0;
 
     double Z[K1];
@@ -172,6 +177,10 @@ int main()
         {
             NII = NI[i];
 
+
+            // skipping the line in inp_file
+
+            // пропускаем строчку в inp_file
             char str[100];
             for (int i1 = 0; i1 < 3; ++i1)
             {
@@ -195,12 +204,9 @@ int main()
         exit(1);
     }
 
-    // we should always close the file after using it
-
-    // после использования файла его всегда нужно закрывать
     fclose(inp_file);
 
-    // with given elements' values Q_gg and Sigma (cross section log)
+    // With given elements' values Q_gg and Sigma (cross section log)
     // we calculate matrix elements values that are found by using 
     // Least Squares method to our data
 
@@ -209,7 +215,10 @@ int main()
     // метода наименьших квадратов к исходным данным
     for (int i = 1; i < K1; ++i)
     {
-        // на главной диагонали матрицы (С элемента C[1][1])
+        // On the main matrix diagonal (sans the C[0][0])
+        // amount of isotopes of each element will be written
+
+        // на главной диагонали матрицы (Пропуская элемент C[0][0])
         // будет записано количество изотопов каждого элемента
         NII = NI[i - 1];
         C[i][i] = (double)NII;
@@ -222,9 +231,7 @@ int main()
             D[i]    += Y[i - 1][j];
         }
     }
-    // Calling gauss method
 
-    // Вызываем метод гаусса
     gaussMethod(C, D, Z);
 
     // Opening output data file "out_file"
@@ -241,12 +248,16 @@ int main()
 
     for (int i = 0; i < K1; ++i)
     {
-        fprintf(out_file, "%d %lf\n", i + 1, Z[i]);
+        fprintf(out_file, " \t %d\t %.17g\n", i + 1, Z[i]);
     }
 
+    fprintf(out_file, "\n");
 
     double a = Z[0];
 
+    // solving the y = ax + b equation
+
+    // решаем уравнение y = ax + b
     for (int i = 0; i < K0; ++i)
     {
         double b = Z[i + 1];
@@ -262,10 +273,16 @@ int main()
         }
     }
 
+
+    // writing to file
+
+    // записываем в файл
     for (int i = 0; i < K0; ++i)
     {
-        fprintf(out_file, "sigma %d %d %lf\n", i, NI[i], sumdy[i]);
+        fprintf(out_file, "sigma\t %d\t %d\t %.17g\n", i + 1, NI[i], sumdy[i]);
     }
+
+    fclose(out_file);
 
     return 0;
 }
