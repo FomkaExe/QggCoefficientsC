@@ -238,28 +238,31 @@ int main()
 
     fclose(out_file);
 
-    std::vector<std::string> colorVec {"b", "r", "g", "c", "m", "y", "k"};
+    std::vector<std::pair<std::string, std::string>> colorVec {{"color", "blue"}, {"color", "orange"}
+                                                            ,{"color", "fuchsia"},{"color", "green"}
+                                                            ,{"color", "black"},{"color", "red"}
+                                                            ,{"color", "lime"}};
 
     for (int i = 0; i < X.size(); ++i) {
-        for (int j = 0; j < X.size(); ++j) {
-            plt::scatter(X[i], Y[i], 40);
+        for (int j = 0; j < Y.size(); ++j) {
+            plt::scatter(X[i], Y[i], 50, std::map<std::string, std::string> {colorVec[i]});
         }
     }
 
-    plt::xlim(-55, 5);
-    plt::ylim(-20, 15);
+    // plt::scatter(X[6], Y[6], 50, std::map<std::string, std::string> {{"c", "k"}, {"marker", "s"}, {"ls", "-"}});
 
-    plt::plot(std::vector<int> {2000, -2000}, std::vector<double> {622.226, -605.471}, "b"); // 8.37
-    plt::plot(std::vector<int> {2000, -2000}, std::vector<double> {628.855, -598.842}, "r"); // 15.00
-    plt::plot(std::vector<int> {2000, -2000}, std::vector<double> {619.517, -608.179}, "g"); // 5.67
-    plt::plot(std::vector<int> {2000, -2000}, std::vector<double> {618.458, -609.238}, "c"); // 4.61
-    plt::plot(std::vector<int> {2000, -2000}, std::vector<double> {616.405, -611.291}, "m"); // 2.56
-    plt::plot(std::vector<int> {2000, -2000}, std::vector<double> {615.13, -612.566}, "y");  // 1.28
-    plt::plot(std::vector<int> {2000, -2000}, std::vector<double> {613.301, -614.395}, "k"); // -0.55
+    plt::xlim(-55, 5);
+    plt::ylim(-12, 15);
+
+    plt::plot(std::vector<int> {2000, -2000}, std::vector<double> {622.226, -605.471}, "blue" /*"black"*/); // 8.37 
+    plt::plot(std::vector<int> {2000, -2000}, std::vector<double> {628.855, -598.842}, "orange" /*"black"*/); // 15.00
+    plt::plot(std::vector<int> {2000, -2000}, std::vector<double> {619.517, -608.179}, "fuchsia" /*"black"*/); // 5.67
+    plt::plot(std::vector<int> {2000, -2000}, std::vector<double> {618.458, -609.238}, "green" /*"black"*/); // 4.61
+    plt::plot(std::vector<int> {2000, -2000}, std::vector<double> {616.405, -611.291}, "black"); // 2.56
+    plt::plot(std::vector<int> {2000, -2000}, std::vector<double> {615.13, -612.566},  "red" /*"black"*/);  // 1.28
+    plt::plot(std::vector<int> {2000, -2000}, std::vector<double> {613.301, -614.395}, "lime" /*"black"*/); // -0.55 
     
     plt::show();
-
-    printf("we are back\n");
 
     return 0;
 }
