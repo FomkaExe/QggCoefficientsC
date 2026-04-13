@@ -5,8 +5,8 @@
       dimension X(K,N), Y(K,N), NI(K), D(K1), Z(K1), C(K1,K1)
       dimension YC(K,N), dyc(K,N), sumdy(K)
 
-      open(11, file = 'OTa_qgg.dat')
-      open(21, file = 'OTa_qgg_out.dat')
+      open(11, file = 'input/OTa_qgg.dat')
+      open(21, file = 'output/OTa_qgg_out.dat')
 
       do 4 i = 1, K1
          D(i) = 0.0d0
