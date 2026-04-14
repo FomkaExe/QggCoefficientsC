@@ -117,7 +117,7 @@ def plot_groups(groups, a, b, output_dir="plots"):
         plt.figure(figsize=(8, 5))
         plt.scatter(x_data, y_data, marker='s', color='black', label='Эксп. данные')
         plt.plot(x_line, y_line, color='black', linewidth=1.0,
-                 label=f'y = {a:.2f}*x + {bj:.2f}')
+                 label=f'y = {a:.2f}*Qgg + {bj:.2f}')
 
         plt.title(name, fontsize=18, fontweight='bold')
         plt.xlabel('Qgg (МэВ)', fontsize=14, fontweight='bold', loc='right')
