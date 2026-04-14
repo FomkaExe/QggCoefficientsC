@@ -4,6 +4,7 @@
 
       dimension X(K,N), Y(K,N), NI(K), D(K1), Z(K1), C(K1,K1)
       dimension YC(K,N), dyc(K,N), sumdy(K)
+      dimension P(K, N)
 
       open(11, file = 'input/OTa_qgg.dat')
       open(21, file = 'output/OTa_qgg_out.dat')
@@ -29,6 +30,8 @@ c input data
             NII = NI(i)
             do 5 j = 1, NII
                read(11,*) iz, in, x(i,j), y(i,j)
+               p(i,j) = dexp(y(i,j) + 6.0d0)
+               p(i,j) = 1.0d0
                write(*,*) 'i=', i, ' j=', j, ' iz=', iz, ' in=', in
                write(*,*) 'x=', x(i,j), ' y=', y(i,j)
  5          continue
@@ -40,13 +43,14 @@ c input data
 c Least squares matrix
       do 20 i = 2, K1
          NII = NI(i-1)
-         C(i,i) = dfloat(NII)
+         C(i,i) = 0.0d0
          do 15 j = 1, NII
-            C(1,1) = C(1,1) + X(i-1,j)**2
-            C(1,i) = C(1,i) + X(i-1,j)
-            C(i,1) = C(i,1) + X(i-1,j)
-            D(1)   = D(1)   + X(i-1,j)*Y(i-1,j)
-            D(i)   = D(i)   + Y(i-1,j)
+            C(1,1) = C(1,1) + P(i-1,j) * X(i-1,j)**2
+            C(1,i) = C(1,i) + P(i-1,j) * X(i-1,j)
+            C(i,1) = C(i,1) + P(i-1,j) * X(i-1,j)
+            C(i,i) = C(i,i) + P(i-1,j)
+            D(1)   = D(1)   + P(i-1,j) * X(i-1,j) * Y(i-1,j)
+            D(i)   = D(i)   + P(i-1,j) * Y(i-1,j)
  15      continue
  20   continue
 
