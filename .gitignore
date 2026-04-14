@@ -50,3 +50,9 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Helper project data
+lsq
+materials/
+output/
+visualizer/plots/
