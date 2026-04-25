@@ -100,30 +100,31 @@ def read_params_file(filename, n_groups):
 def plot_groups(groups, a, b, output_dir="plots"):
     os.makedirs(output_dir, exist_ok=True)
 
+    colors = plt.cm.tab10.colors
+
     for j, group in enumerate(groups):
         name = group["name"]
         points = group["points"]
         bj = b[j]
+        color = colors[j % len(colors)]
 
         x_data = np.array([p[0] for p in points])
         y_data = np.array([p[1] for p in points])
 
-        # диапазон X для линии
         x_min = min(x_data.min(), 0) - 2
         x_max = max(x_data.max(), 0) + 2
         x_line = np.linspace(x_min, x_max, 200)
         y_line = a * x_line + bj
 
         plt.figure(figsize=(8, 5))
-        plt.scatter(x_data, y_data, marker='s', color='black', label='Эксп. данные')
-        plt.plot(x_line, y_line, color='black', linewidth=1.0,
-                 label=f'y = {a:.2f}*Qgg + {bj:.2f}')
+        plt.scatter(x_data, y_data, marker='s', color=color, label='Эксп. данные')
+        plt.plot(x_line, y_line, color=color, linewidth=1.5,
+                 label=f'y = {a:.2f}*x + {bj:.2f}')
 
         plt.title(name, fontsize=18, fontweight='bold')
         plt.xlabel('Qgg (МэВ)', fontsize=14, fontweight='bold', loc='right')
         plt.ylabel('Ln(σ)', fontsize=14, fontweight='bold', rotation=0, loc='top')
 
-        plt.grid(False)
         plt.legend(frameon=False, loc='upper left')
         plt.tight_layout()
 
@@ -132,6 +133,49 @@ def plot_groups(groups, a, b, output_dir="plots"):
         plt.close()
 
         print(f"Сохранен график: {out_path}")
+
+def plot_all_groups(groups, a, b, output_dir="plots"):
+    os.makedirs(output_dir, exist_ok=True)
+
+    colors = plt.cm.tab10.colors
+
+    plt.figure(figsize=(10, 7))
+
+    all_x = []
+    all_y = []
+
+    for j, group in enumerate(groups):
+        name = group["name"]
+        points = group["points"]
+        bj = b[j]
+        color = colors[j % len(colors)]
+
+        x_data = np.array([p[0] for p in points])
+        y_data = np.array([p[1] for p in points])
+
+        all_x.extend(x_data)
+        all_y.extend(y_data)
+
+        x_min = min(x_data.min(), 0) - 2
+        x_max = max(x_data.max(), 0) + 2
+        x_line = np.linspace(x_min, x_max, 200)
+        y_line = a * x_line + bj
+
+        plt.scatter(x_data, y_data, marker='s', color=color, s=35, label=f'{name} exp')
+        plt.plot(x_line, y_line, color=color, linewidth=1.5, label=f'{name}: y={a:.2f}x+{bj:.2f}')
+
+    plt.xlabel('Qgg (МэВ)', fontsize=14, fontweight='bold')
+    plt.ylabel('Ln(σ)', fontsize=14, fontweight='bold')
+    plt.title('P=exp', fontsize=16, fontweight='bold')
+
+    plt.legend(frameon=False, fontsize=9, ncol=2)
+    plt.tight_layout()
+
+    out_path = os.path.join(output_dir, "all_groups.png")
+    plt.savefig(out_path, dpi=150)
+    plt.close()
+
+    print(f"Сохранен общий график: {out_path}")
 
 
 def main():
@@ -146,6 +190,7 @@ def main():
         print(f"b{i} = {bj}")
 
     plot_groups(groups, a, b, output_dir="plots")
+    plot_all_groups(groups, a, b, output_dir="plots")
 
 
 if __name__ == "__main__":
