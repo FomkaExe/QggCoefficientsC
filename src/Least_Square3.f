@@ -1,5 +1,6 @@
       program GaussMethod
       implicit double precision (a-h, o-z)
+ccc      parameter(K = 14,K1 = 15, N= 11)
       parameter (K = 7, K1 = 8, N = 11)
 
       dimension X(K,N), Y(K,N), NI(K), D(K1), Z(K1), C(K1,K1)
@@ -19,19 +20,25 @@
 
 c input data
       read(11,*) K0
-      write(*,*) 'K0 = ', K0
-
       if (K0 .le. K) then
          read(11,*) (NI(i), i = 1, K0)
-         write(*,*) 'NI: ', (NI(i), i = 1, K0)
-
          do 10 i = 1, K0
             read(11,*)
             NII = NI(i)
             do 5 j = 1, NII
                read(11,*) iz, in, x(i,j), y(i,j)
-               p(i,j) = dexp(y(i,j) + 6.0d0)
-               p(i,j) = 1.0d0
+               if (i .eq. 1) then
+                  p(i,j) = exp(y(i,j) + 6.0d0)
+                  write(*,*) 'pij = exp(y(i,j) + 6.0d0)'
+               else if (i .eq. 2) then
+                  p(i, j) = exp(y(i,j))
+                  write(*,*) 'pij = exp(y(i,j))'
+               else
+                  p(i,j) = exp(y(i,j) + 6.0d0 + (2.3d0 * (i - 2)))
+                  write(*,*) 'pij = exp(y(i,j)+...+',(2.3d0 * (i - 2))
+               end if
+ccc               p(i,j) = 1
+
                write(*,*) 'i=', i, ' j=', j, ' iz=', iz, ' in=', in
                write(*,*) 'x=', x(i,j), ' y=', y(i,j)
  5          continue
@@ -43,7 +50,8 @@ c input data
 c Least squares matrix
       do 20 i = 2, K1
          NII = NI(i-1)
-         C(i,i) = 0.0d0
+ccc         C(i,i) = 0.0d0
+         C(i,i) = float(NII)
          do 15 j = 1, NII
             C(1,1) = C(1,1) + P(i-1,j) * X(i-1,j)**2
             C(1,i) = C(1,i) + P(i-1,j) * X(i-1,j)
@@ -72,19 +80,31 @@ c Least squares matrix
       a = z(1)
 
 c solution accuracy
+      sumP = 0.0d0
+      sumErr = 0.0d0
       do 60 ik = 1, K0
          b = z(ik+1)
          sumdy(ik) = 0.0d0
+         err = 0.0d0
+         sumPikin = 0.0d0
          do 50 in = 1, NI(ik)
             YC(ik,in)  = a * X(ik,in) + b
             dyc(ik,in) = YC(ik,in) - Y(ik,in)
+            sumPikin = sumPikin + p(ik, in)
+            if (abs(Y(ik,in)) .gt. 1.d-6) then
+               err = err + (p(ik, in) * abs(dyc(ik, in) / Y(ik, in)))
+            end if
             if (abs(YC(ik,in)) .gt. 1.0d0) then
                sumdy(ik) = sumdy(ik) +
      &                     dyc(ik,in)**2 / abs(YC(ik,in))
             end if
  50      continue
          write(21,*) 'sigma', ik, NI(ik), sumdy(ik)
+ccc         write(21,*) 'невяз', ik, NI(ik), (err / K0) / sumPikin
+         sumP = sumP + sumPikin
+         sumErr = sumErr + err
  60   continue
+ccc      write(21,*) 'невязка общая', (sumErr / K0) / sumP
 
  999  continue
       stop
