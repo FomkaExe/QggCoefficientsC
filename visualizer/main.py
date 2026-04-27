@@ -59,30 +59,21 @@ def read_params_file(filename, n_groups):
     b_dict = {}
 
     with open(filename, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
+        for raw_line in f:
+            line = raw_line.strip()
             if not line:
                 continue
 
-            # a= ...
-            m_a = re.match(r'^a=\s*([+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)$', line)
+            m_a = re.fullmatch(r"a\s*=\s*([0-9]*\.[0-9]+)", line, re.IGNORECASE)
             if m_a:
                 a = float(m_a.group(1))
                 continue
 
-            # b( 1 )= ...
-            m_b = re.match(
-                r'^b\(\s*(\d+)\s*\)\s*=\s*([+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)$',
-                line
-            )
+            m_b = re.fullmatch(r"b\((\d+)\)\s*=\s*(-?[0-9]*\.[0-9]+)", line, re.IGNORECASE)
             if m_b:
                 idx = int(m_b.group(1))
                 val = float(m_b.group(2))
                 b_dict[idx] = val
-                continue
-
-            # sigma ... пропускаем
-            if line.lower().startswith("sigma"):
                 continue
 
     if a is None:
