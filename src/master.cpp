@@ -201,12 +201,12 @@ auto main() -> int {
     auto sumErr{0.0L};
     auto nev{make_matrix_1D(K0)};
 
-    for (size_t i = 0; i < K0; ++i) {
+    for (size_type i = 0; i < K0; ++i) {
         long double b = R.at(i + 1);
 
         auto err{0.0L};
         auto sumPikin{0.0L};
-        for (size_t j = 0; j < NI[i]; ++j) {
+        for (size_type j = 0; j < NI[i]; ++j) {
             long double yc{a * X.at(i).at(j) + b};
             long double dyc{yc - Y.at(i).at(j)};
 
