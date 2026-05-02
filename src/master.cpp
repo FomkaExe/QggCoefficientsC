@@ -1,26 +1,25 @@
 #include <iostream>
 #include <fstream>
-#include <stdexcept>
 #include <vector>
 #include <cmath>
 
 // helpers --------------------------------------------------------------------
 // generic aliases
-template <typename T = double>
+template <typename T = long double>
 using matrix1D = std::vector<T>;
-template <typename T = double>
+template <typename T = long double>
 using matrix2D = std::vector<std::vector<T>>;
 
 using size_type = std::size_t;
 
 // factory function for one-dimensional matrices
-template <typename T = double>
+template<typename T = long double>
 matrix1D<T> make_matrix_1D(size_type _sz, T _default = T{}) {
     return matrix1D<T>(_sz, _default);
 }
 
 // factory function for two-dimensional matrices
-template <typename T = double>
+template <typename T = long double>
 matrix2D<T> make_matrix_2D(size_type _szm, size_type _szn, T _default = T{}) {
     return matrix2D<T>(_szm, matrix1D<T>(_szn, _default));
 }
@@ -31,8 +30,7 @@ constexpr std::string_view INPUT{"../input/OTa_qgg.dat"};
 constexpr std::string_view OUTPUT{"../output/OTa_qgg_out.dat"};
 // ----------------------------------------------------------------------------
 
-// _C and _D are acquired by value
-template <typename T = double>
+template <typename T = long double>
 matrix1D<T> gauss_method(matrix2D<T> _C, matrix1D<T> _D) {
     const int n = _C.size();
 
@@ -41,13 +39,13 @@ matrix1D<T> gauss_method(matrix2D<T> _C, matrix1D<T> _D) {
         // Find pivot row
         int pivot = col;
         for (int row = col + 1; row < n; ++row) {
-            if (std::abs(_C[row][col]) > std::abs(_C[pivot][col])) {
+            if (std::fabs(_C[row][col]) > std::fabs(_C[pivot][col])) {
                 pivot = row;
             }
         }
 
         // Check singularity
-        if (std::abs(_C[pivot][col]) < 1e-12) {
+        if (std::fabs(_C[pivot][col]) < 1e-12) {
             std::cout << "ERROR";
             return matrix1D<T>{};
         }
@@ -122,20 +120,44 @@ auto main() -> int {
         input >> tag >> name;
         for (size_type j = 0; j < NI[i]; ++j) {
             [[maybe_unused]] size_type ik, in;
-            double xij, yij;
+            long double xij, yij, pij;
 
-            input >> ik >> in >> xij >> yij;
+            input >> ik >> in >> xij >> yij >> pij;
 
             X.at(i).at(j) = xij;
             Y.at(i).at(j) = yij;
 
-            p.at(i).at(j) = (i == 0)
-                ? std::exp(yij + 6.0L)
-                : std::exp(yij + 2.3L * (i - 1));
+            switch (i) {
+                case 0:
+                    p[i][j] = std::expl(yij + 6.0L);
+                    break;
+                case 1:
+                    p[i][j] = std::expl(yij);
+                    break;
+                case 2:
+                    p[i][j] = std::expl(static_cast<long double>(yij + 8.3L));
+                    break;
+                case 3:
+                    p[i][j] = std::expl(yij + 10.6L);
+                    break;
+                case 4:
+                    p[i][j] = std::expl(yij + 12.9L);
+                    break;
+                case 5:
+                    p[i][j] = std::expl(yij + 15.2L);
+                    break;
+                case 6:
+                    p[i][j] = std::expl(yij + 17.5L);
+                    break;
+                default:
+                    break;
+            }
 
-            // left for legacy reasons
-            // p.at(i).at(j) = 1.0;
-            // p.at(i).at(j) = std::exp(yij + 6.0);
+            if (std::fabs(pij - p[i][j]) > 1e-6) {
+                std::cout << yij << std::endl;
+                std::cout << pij << " " << p[i][j] << std::endl;
+                std::exit(1);
+            }
         }
     }
 
@@ -163,7 +185,6 @@ auto main() -> int {
             D[i]    += p[i - 1][j] * Y[i - 1][j];
         }
     }
-    // ---------------------------------------------------------------
 
     auto R = gauss_method(C, D);
 
@@ -195,7 +216,7 @@ auto main() -> int {
                 sigma.at(i) += dyc*dyc / std::abs(yc);
             }
 
-            if (std::abs(yc) > 1.0e-6L) {
+            if (std::abs(Y[i][j]) > 1.0e-6L) {
                 err += (p.at(i).at(j) * std::abs(dyc / Y[i][j]));
             }
         }
